@@ -94,24 +94,41 @@ export default function TimelineGrid() {
                     // If booked, don't render the clickable empty slot background, we'll render the solid booking card on top.
                     if (booking) return null;
 
+                    // Check for space-level availability (e.g. maintenance)
+                    const isMaintenance = selectedSpace && selectedSpace.status !== 'active';
+                    const notAvailable = isPast || isMaintenance;
+                    
+                    let reason = '';
+                    if (isPast) reason = '(Past Time)';
+                    else if (isMaintenance) reason = '(Maintenance)';
+
                     return (
                       <div
                         key={`slot-${slot.index}`}
-                        style={{ gridRow: arrayIndex + 1, gridColumn: 1 }}
+                        style={{ 
+                          gridRow: arrayIndex + 1, 
+                          gridColumn: 1,
+                          ...(notAvailable ? { backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(0,0,0,0.03) 10px, rgba(0,0,0,0.03) 20px)' } : {})
+                        }}
                         className={`group border-b border-surface-100 last:border-b-0 transition-colors ${
-                          isPast 
+                          notAvailable 
                             ? 'bg-surface-50/50 cursor-not-allowed' 
                             : 'hover:bg-brand-50/50 cursor-pointer'
                         }`}
                         onClick={() => {
-                          if (!isPast) handleSlotClick(selectedSpace, slot);
+                          if (!notAvailable) handleSlotClick(selectedSpace, slot);
                         }}
                       >
-                        {!isPast && (
+                        {!notAvailable ? (
                           <div className="h-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                             <span className="text-sm font-bold text-brand-600 bg-white px-4 py-1.5 rounded-full shadow-sm border border-brand-100">
                               Book {slot.label}
                             </span>
+                          </div>
+                        ) : (
+                          <div className="h-full flex flex-col items-center justify-center">
+                            <span className="text-sm font-bold text-surface-400">Not Available</span>
+                            <span className="text-xs font-semibold text-surface-400/80">{reason}</span>
                           </div>
                         )}
                       </div>
