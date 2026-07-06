@@ -1,0 +1,180 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    @apply bg-surface-50 text-surface-800 font-sans;
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+  }
+
+  ::selection {
+    @apply bg-brand-200 text-brand-900;
+  }
+}
+
+@layer components {
+  /* Premium scrollbar styling */
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    @apply bg-surface-300 rounded-full;
+    transition: background-color 0.2s;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    @apply bg-surface-400;
+  }
+
+  /* Glass morphism panel */
+  .glass-panel {
+    @apply bg-white/80 backdrop-blur-xl border border-surface-200/60;
+  }
+
+  /* Slot cell base */
+  .slot-cell {
+    @apply relative rounded-lg transition-all duration-200 cursor-pointer
+           border-2 min-h-[52px] flex items-center justify-center text-xs font-medium;
+  }
+
+  .slot-available {
+    @apply bg-white border-surface-300 text-surface-900
+           hover:bg-brand-50 hover:border-brand-400 hover:shadow-soft
+           hover:scale-[1.02] active:scale-[0.98];
+  }
+
+  .slot-booked {
+    @apply bg-surface-600 border-surface-700 text-white
+           cursor-not-allowed opacity-100;
+  }
+
+  .slot-yours {
+    @apply bg-brand-100 border-brand-500 text-brand-900
+           ring-2 ring-brand-500/30 shadow-md;
+  }
+
+  /* Sound pad button */
+  .sound-btn {
+    @apply relative flex flex-col items-center justify-center gap-1.5
+           rounded-2xl border-2 border-surface-200 bg-surface-50
+           p-4 transition-all duration-200 cursor-pointer
+           hover:border-brand-300 hover:bg-brand-50 hover:shadow-medium
+           active:scale-95;
+  }
+
+  .sound-btn-active {
+    @apply border-brand-500 bg-brand-50 shadow-glow-brand text-brand-700;
+  }
+
+  /* Modal backdrop */
+  .modal-backdrop {
+    @apply fixed inset-0 bg-surface-900/40 backdrop-blur-sm z-50
+           flex items-center justify-center p-4;
+  }
+
+  /* Premium card */
+  .card {
+    @apply bg-white rounded-2xl border border-surface-200 shadow-soft;
+  }
+
+  .card-elevated {
+    @apply bg-white rounded-2xl border border-surface-100 shadow-elevated;
+  }
+
+  /* Input styling */
+  .input-field {
+    @apply w-full px-4 py-2.5 rounded-xl border-2 border-surface-200
+           bg-surface-50 text-surface-800 placeholder:text-surface-400
+           transition-all duration-200
+           focus:outline-none focus:border-brand-400 focus:bg-white focus:ring-4 focus:ring-brand-50;
+  }
+
+  /* Button base */
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 px-5 py-2.5
+           rounded-xl font-semibold text-sm transition-all duration-200
+           focus:outline-none focus:ring-4 active:scale-[0.98]
+           disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100;
+  }
+
+  .btn-primary {
+    @apply btn bg-brand-600 text-white shadow-soft
+           hover:bg-brand-700 hover:shadow-medium
+           focus:ring-brand-100;
+  }
+
+  .btn-secondary {
+    @apply btn bg-surface-100 text-surface-700 border border-surface-200
+           hover:bg-surface-200 hover:border-surface-300
+           focus:ring-surface-100;
+  }
+
+  .btn-danger {
+    @apply btn bg-booked text-white shadow-soft
+           hover:bg-booked-dark hover:shadow-medium
+           focus:ring-red-100;
+  }
+
+  .btn-ghost {
+    @apply btn bg-transparent text-surface-600
+           hover:bg-surface-100 hover:text-surface-800
+           focus:ring-surface-100;
+  }
+
+  /* Badge */
+  .badge {
+    @apply inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold;
+  }
+
+  .badge-confirmed {
+    @apply badge bg-available-light text-available-dark border border-available-border;
+  }
+
+  .badge-cancelled {
+    @apply badge bg-booked-light text-booked-dark border border-booked-border;
+  }
+
+  /* Volume slider */
+  .volume-slider {
+    @apply w-full h-2 rounded-full appearance-none cursor-pointer
+           bg-surface-200;
+  }
+
+  .volume-slider::-webkit-slider-thumb {
+    @apply appearance-none w-5 h-5 rounded-full bg-brand-600
+           shadow-medium cursor-pointer border-2 border-white;
+    -webkit-appearance: none;
+  }
+
+  .volume-slider::-moz-range-thumb {
+    @apply w-5 h-5 rounded-full bg-brand-600
+           shadow-medium cursor-pointer border-2 border-white;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
