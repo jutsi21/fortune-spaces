@@ -39,9 +39,8 @@ export function BookingProvider({ children }) {
       
       const activeSpaces = fetchedSpaces.filter(s => s.status === 'active');
       
-      if (activeSpaces.length > 0 && !selectedSpace) {
-        setSelectedSpace(activeSpaces[0]);
-      } else if (activeSpaces.length === 0) {
+      // Auto-selection removed to support mobile master-list view.
+      if (activeSpaces.length === 0) {
         setSelectedSpace(null);
       }
       setLoadingSpaces(false);

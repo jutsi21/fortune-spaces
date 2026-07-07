@@ -37,9 +37,9 @@ export default function Sidebar() {
   const activeSpaces = spaces.filter((s) => s.status === 'active');
 
   return (
-    <aside className="w-[260px] h-screen bg-white border-r border-surface-200 flex flex-col shrink-0">
+    <aside className="w-full md:w-[320px] h-full bg-white md:border-r border-surface-200 flex flex-col shrink-0">
       {/* Logo */}
-      <div className="px-5 py-5 border-b border-surface-100">
+      <div className="hidden md:block px-5 py-5 border-b border-surface-100">
         <div className="flex items-center gap-2.5">
           <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-brand-500 to-brand-700 flex items-center justify-center shadow-soft">
             <Zap size={18} className="text-white" />
@@ -144,7 +144,7 @@ export default function Sidebar() {
       </div>
 
       {/* Admin Link */}
-      <div className="px-3 py-3 border-t border-surface-100">
+      <div className="hidden md:block px-3 py-3 border-t border-surface-100">
         <Link
           to="/admin"
           className={`flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 ${
