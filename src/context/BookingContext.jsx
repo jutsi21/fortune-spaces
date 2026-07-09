@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState, useCallback, useMemo } from 'react';
-import { subscribeToSpaces, subscribeToAllBookingsForDate, subscribeToGlobalSettings } from '../lib/firestore';
+import { subscribeToSpaces, subscribeToAllBookingsForDate, subscribeToGlobalSettings, subscribeToRecurringBookings } from '../lib/firestore';
 import { formatDateKey, generateTimeSlots } from '../lib/utils';
 
 const BookingContext = createContext(null);
@@ -8,7 +8,8 @@ export function BookingProvider({ children }) {
   const [spaces, setSpaces] = useState([]);
   const [selectedSpace, setSelectedSpace] = useState(null);
   const [selectedDate, setSelectedDate] = useState(new Date());
-  const [bookings, setBookings] = useState([]);
+  const [dailyBookings, setDailyBookings] = useState([]);
+  const [recurringBookings, setRecurringBookings] = useState([]);
   const [globalSettings, setGlobalSettings] = useState({ startHour: 7, endHour: 21 });
   const [loadingSpaces, setLoadingSpaces] = useState(true);
   const [loadingBookings, setLoadingBookings] = useState(true);
@@ -52,11 +53,24 @@ export function BookingProvider({ children }) {
     setLoadingBookings(true);
     const dateKey = formatDateKey(selectedDate);
     const unsubscribe = subscribeToAllBookingsForDate(dateKey, (fetchedBookings) => {
-      setBookings(fetchedBookings);
+      setDailyBookings(fetchedBookings);
       setLoadingBookings(false);
     });
     return unsubscribe;
   }, [selectedDate]);
+
+  useEffect(() => {
+    const unsubscribe = subscribeToRecurringBookings((fetchedRecurring) => {
+      setRecurringBookings(fetchedRecurring);
+    });
+    return unsubscribe;
+  }, []);
+
+  const bookings = useMemo(() => {
+    const currentDayOfWeek = selectedDate.getDay();
+    const matchingRecurring = recurringBookings.filter(b => b.dayOfWeek === currentDayOfWeek);
+    return [...dailyBookings, ...matchingRecurring];
+  }, [dailyBookings, recurringBookings, selectedDate]);
 
   useEffect(() => {
     const unsubscribe = subscribeToGlobalSettings((settings) => {

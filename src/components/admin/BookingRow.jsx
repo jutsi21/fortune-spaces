@@ -3,6 +3,8 @@ import { Pencil, Trash2, User, Mail, Briefcase } from 'lucide-react';
 
 export default function BookingRow({ booking, spaceName, onCancel, onEdit }) {
   const isCancelled = booking.status === 'cancelled';
+  const DAYS_OF_WEEK = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  const dateDisplay = booking.isRecurring ? `Every ${DAYS_OF_WEEK[booking.dayOfWeek]}` : booking.date;
 
   return (
     <div
@@ -26,7 +28,7 @@ export default function BookingRow({ booking, spaceName, onCancel, onEdit }) {
 
       {/* Date */}
       <div>
-        <p className="text-sm text-surface-700">{booking.date}</p>
+        <p className="text-sm text-surface-700">{dateDisplay}</p>
       </div>
 
       {/* Time */}
@@ -37,10 +39,15 @@ export default function BookingRow({ booking, spaceName, onCancel, onEdit }) {
       </div>
 
       {/* Status */}
-      <div>
+      <div className="flex flex-col gap-1 items-start">
         <span className={isCancelled ? 'badge-cancelled' : 'badge-confirmed'}>
           {booking.status}
         </span>
+        {booking.isRecurring && (
+          <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-brand-100 text-brand-700 border border-brand-200">
+            Recurring
+          </span>
+        )}
       </div>
 
       {/* Actions */}

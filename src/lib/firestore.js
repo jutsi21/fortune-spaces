@@ -109,6 +109,24 @@ export function subscribeToAllBookingsForDate(date, callback) {
 }
 
 /**
+ * Subscribe to active recurring bookings.
+ */
+export function subscribeToRecurringBookings(callback) {
+  const q = query(
+    bookingsCol,
+    where('isRecurring', '==', true),
+    where('status', '==', 'confirmed')
+  );
+  return onSnapshot(q, (snapshot) => {
+    const bookings = snapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+    callback(bookings);
+  });
+}
+
+/**
  * Create a new booking with `confirmed` status.
  * Enforces minimum 1-hour duration (2 blocks) and checks for conflicts.
  */
@@ -117,24 +135,62 @@ export async function createBooking(bookingData) {
     throw new Error('Minimum booking duration is 1 hour.');
   }
 
-  // Double check overlap on the "backend" before saving
-  const q = query(
-    bookingsCol,
-    where('spaceId', '==', bookingData.spaceId),
-    where('date', '==', bookingData.date),
-    where('status', '==', 'confirmed')
-  );
-  const snapshot = await getDocs(q);
-  const existingBookings = snapshot.docs.map((doc) => doc.data());
-
+  // Validation helper
   const newStart = bookingData.slotIndex;
   const newEnd = bookingData.slotIndex + bookingData.durationBlocks;
-
-  for (const b of existingBookings) {
+  const hasOverlap = (b) => {
     const bStart = b.slotIndex;
     const bEnd = b.slotIndex + (b.durationBlocks || 1);
-    if (newStart < bEnd && bStart < newEnd) {
+    return newStart < bEnd && bStart < newEnd;
+  };
+
+  const dayOfWeek = bookingData.isRecurring
+    ? bookingData.dayOfWeek
+    : new Date(bookingData.date + 'T00:00:00').getDay();
+
+  // 1. Check against recurring bookings on this day of week
+  const recurringQ = query(
+    bookingsCol,
+    where('spaceId', '==', bookingData.spaceId),
+    where('isRecurring', '==', true),
+    where('dayOfWeek', '==', dayOfWeek),
+    where('status', '==', 'confirmed')
+  );
+  const recurringSnap = await getDocs(recurringQ);
+  const recurringBookings = recurringSnap.docs.map(doc => doc.data());
+
+  if (recurringBookings.some(hasOverlap)) {
+    throw new Error('Time slot conflict with a recurring booking.');
+  }
+
+  // 2. Check single bookings
+  if (!bookingData.isRecurring) {
+    const singleQ = query(
+      bookingsCol,
+      where('spaceId', '==', bookingData.spaceId),
+      where('date', '==', bookingData.date),
+      where('status', '==', 'confirmed')
+    );
+    const singleSnap = await getDocs(singleQ);
+    const singleBookings = singleSnap.docs.map((doc) => doc.data());
+    
+    if (singleBookings.some(hasOverlap)) {
       throw new Error('Time slot conflict detected on the server.');
+    }
+  } else {
+    // If creating a recurring booking, check ALL confirmed single bookings for that space
+    const allSingleQ = query(
+      bookingsCol,
+      where('spaceId', '==', bookingData.spaceId),
+      where('status', '==', 'confirmed')
+    );
+    const allSingleSnap = await getDocs(allSingleQ);
+    const singleBookings = allSingleSnap.docs
+      .map(doc => doc.data())
+      .filter(b => !b.isRecurring && new Date(b.date + 'T00:00:00').getDay() === dayOfWeek);
+
+    if (singleBookings.some(hasOverlap)) {
+      throw new Error('Time slot conflict with an existing single booking on this day of the week.');
     }
   }
 
@@ -167,20 +223,59 @@ export async function updateBooking(bookingId, updates) {
 
   const newEnd = newStart + newDuration;
 
-  const q = query(
-    bookingsCol,
-    where('spaceId', '==', newSpaceId),
-    where('date', '==', newDate),
-    where('status', '==', 'confirmed')
-  );
-  const snapshot = await getDocs(q);
-  const otherBookings = snapshot.docs.map(d => ({ id: d.id, ...d.data() })).filter(b => b.id !== bookingId);
+  const isRecurring = updates.isRecurring !== undefined ? updates.isRecurring : existingData.isRecurring;
+  const newDayOfWeek = updates.dayOfWeek !== undefined ? updates.dayOfWeek : existingData.dayOfWeek;
+  const dayOfWeek = isRecurring ? newDayOfWeek : new Date(newDate + 'T00:00:00').getDay();
 
-  for (const b of otherBookings) {
+  const hasOverlap = (b) => {
     const bStart = b.slotIndex;
     const bEnd = b.slotIndex + (b.durationBlocks || 1);
-    if (newStart < bEnd && bStart < newEnd) {
+    return newStart < bEnd && bStart < newEnd;
+  };
+
+  // 1. Check against recurring bookings
+  const recurringQ = query(
+    bookingsCol,
+    where('spaceId', '==', newSpaceId),
+    where('isRecurring', '==', true),
+    where('dayOfWeek', '==', dayOfWeek),
+    where('status', '==', 'confirmed')
+  );
+  const recurringSnap = await getDocs(recurringQ);
+  const recurringBookings = recurringSnap.docs.map(d => ({ id: d.id, ...d.data() })).filter(b => b.id !== bookingId);
+
+  if (recurringBookings.some(hasOverlap)) {
+    throw new Error('Time slot conflict with a recurring booking.');
+  }
+
+  // 2. Check single bookings
+  if (!isRecurring) {
+    const singleQ = query(
+      bookingsCol,
+      where('spaceId', '==', newSpaceId),
+      where('date', '==', newDate),
+      where('status', '==', 'confirmed')
+    );
+    const singleSnap = await getDocs(singleQ);
+    const otherBookings = singleSnap.docs.map(d => ({ id: d.id, ...d.data() })).filter(b => b.id !== bookingId);
+    
+    if (otherBookings.some(hasOverlap)) {
       throw new Error('Time slot conflict detected on the server.');
+    }
+  } else {
+    // Check all confirmed single bookings
+    const allSingleQ = query(
+      bookingsCol,
+      where('spaceId', '==', newSpaceId),
+      where('status', '==', 'confirmed')
+    );
+    const allSingleSnap = await getDocs(allSingleQ);
+    const singleBookings = allSingleSnap.docs
+      .map(d => ({ id: d.id, ...d.data() }))
+      .filter(b => b.id !== bookingId && !b.isRecurring && new Date(b.date + 'T00:00:00').getDay() === dayOfWeek);
+
+    if (singleBookings.some(hasOverlap)) {
+      throw new Error('Time slot conflict with an existing single booking on this day of the week.');
     }
   }
 

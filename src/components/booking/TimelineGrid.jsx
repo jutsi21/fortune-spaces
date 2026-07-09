@@ -174,7 +174,7 @@ export default function TimelineGrid() {
                               ? 'bg-brand-600 border-brand-500 text-white' 
                               : 'bg-white border-surface-700 text-surface-900'
                           }`}>
-                            {isYours ? 'Your Booking' : 'Reserved'}
+                            {isYours ? 'Your Booking' : (booking.isRecurring ? 'Reserved (Recurring)' : 'Reserved')}
                           </div>
                         </div>
 
