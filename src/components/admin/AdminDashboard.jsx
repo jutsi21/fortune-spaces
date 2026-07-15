@@ -175,8 +175,8 @@ export default function AdminDashboard() {
       <header className="bg-white border-b border-surface-200 px-6 py-4">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-brand-500 to-brand-700 flex items-center justify-center shadow-soft">
-              <Zap size={18} className="text-white" />
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-brand-500 to-brand-700 flex items-center justify-center shadow-soft overflow-hidden shrink-0">
+              <img src="https://res.cloudinary.com/dw9axu7dy/image/upload/v1778062222/Fortune_Builders_LOGO_h4eb55.jpg" alt="Fortune Builders Logo" className="w-full h-full object-cover" />
             </div>
             <div>
               <h1 className="text-lg font-extrabold text-surface-900">Admin Console</h1>
@@ -299,11 +299,12 @@ export default function AdminDashboard() {
             {/* Bookings Table */}
             <div className="card overflow-hidden">
               {/* Table Header */}
-              <div className="grid grid-cols-[1.2fr_1fr_0.8fr_0.8fr_0.6fr_0.6fr] gap-4 px-5 py-3 bg-surface-50 border-b border-surface-100">
+              <div className="grid grid-cols-[1.2fr_1fr_0.8fr_0.8fr_0.8fr_0.6fr_0.6fr] gap-4 px-5 py-3 bg-surface-50 border-b border-surface-100">
                 <span className="text-xs font-bold text-surface-500 uppercase tracking-wider">Booker</span>
                 <span className="text-xs font-bold text-surface-500 uppercase tracking-wider">Space</span>
                 <span className="text-xs font-bold text-surface-500 uppercase tracking-wider">Date</span>
                 <span className="text-xs font-bold text-surface-500 uppercase tracking-wider">Time</span>
+                <span className="text-xs font-bold text-surface-500 uppercase tracking-wider">Created At</span>
                 <span className="text-xs font-bold text-surface-500 uppercase tracking-wider">Status</span>
                 <span className="text-xs font-bold text-surface-500 uppercase tracking-wider text-right">Actions</span>
               </div>

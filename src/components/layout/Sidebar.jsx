@@ -41,8 +41,8 @@ export default function Sidebar() {
       {/* Logo */}
       <div className="hidden md:block px-5 py-5 border-b border-surface-100">
         <div className="flex items-center gap-2.5">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-brand-500 to-brand-700 flex items-center justify-center shadow-soft">
-            <Zap size={18} className="text-white" />
+          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-brand-500 to-brand-700 flex items-center justify-center shadow-soft overflow-hidden shrink-0">
+            <img src="https://res.cloudinary.com/dw9axu7dy/image/upload/v1778062222/Fortune_Builders_LOGO_h4eb55.jpg" alt="Fortune Builders Logo" className="w-full h-full object-cover" />
           </div>
           <div>
             <h1 className="text-base font-extrabold text-surface-900 tracking-tight">Fortune Spaces</h1>

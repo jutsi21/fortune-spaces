@@ -8,7 +8,7 @@ export default function BookingRow({ booking, spaceName, onCancel, onEdit }) {
 
   return (
     <div
-      className={`grid grid-cols-[1.2fr_1fr_0.8fr_0.8fr_0.6fr_0.6fr] gap-4 px-5 py-3.5 items-center hover:bg-surface-50 transition-colors ${
+      className={`grid grid-cols-[1.2fr_1fr_0.8fr_0.8fr_0.8fr_0.6fr_0.6fr] gap-4 px-5 py-3.5 items-center hover:bg-surface-50 transition-colors ${
         isCancelled ? 'opacity-60' : ''
       }`}
     >
@@ -35,6 +35,13 @@ export default function BookingRow({ booking, spaceName, onCancel, onEdit }) {
       <div>
         <p className="text-sm text-surface-700">
           {formatTime(booking.startTime)} – {formatTime(booking.endTime)}
+        </p>
+      </div>
+
+      {/* Created At */}
+      <div>
+        <p className="text-sm text-surface-500">
+          {booking.createdAt ? new Date(booking.createdAt).toLocaleString([], { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'Unknown'}
         </p>
       </div>
 

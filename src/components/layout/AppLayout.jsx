@@ -13,8 +13,8 @@ export default function AppLayout() {
       {/* Mobile Top Navigation */}
       <div className="md:hidden flex items-center justify-between px-5 py-4 bg-white border-b border-surface-200 shrink-0">
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-brand-500 to-brand-700 flex items-center justify-center shadow-soft">
-            <Zap size={16} className="text-white" />
+          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-brand-500 to-brand-700 flex items-center justify-center shadow-soft overflow-hidden shrink-0">
+            <img src="https://res.cloudinary.com/dw9axu7dy/image/upload/v1778062222/Fortune_Builders_LOGO_h4eb55.jpg" alt="Fortune Builders Logo" className="w-full h-full object-cover" />
           </div>
           <span className="font-extrabold text-surface-900 tracking-tight">Fortune Spaces</span>
         </div>

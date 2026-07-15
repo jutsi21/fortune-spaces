@@ -84,14 +84,15 @@ export default function TimelineGrid() {
                 {/* Right Column: Grid and Bookings */}
                 <div 
                   className="flex-1 grid relative"
-                  style={{ gridTemplateRows: `repeat(${timeSlots.length}, 6rem)` }}
+                  style={{ gridTemplateRows: `repeat(${timeSlots.length}, 6rem)`, gridAutoColumns: 'minmax(0, 1fr)' }}
                 >
                   {/* Empty Slots */}
                   {timeSlots.map((slot, arrayIndex) => {
                     const isPast = isSlotPast(slot.end, selectedDate);
+                    // Instead of hiding empty slots for any booking, we might still render the background if there's space, but for now we'll just check if any booking starts here.
                     const booking = getBookingForSlot(slot.index, spaceBookings);
 
-                    // If booked, don't render the clickable empty slot background, we'll render the solid booking card on top.
+                    // If booked, we still render the slot container so the grid layout stays consistent, but we don't make it clickable if it's fully booked. Actually, if we allow multiple bookings, maybe we shouldn't hide the empty slot? Let's hide it if there's any booking to keep the current behavior, or maybe not hide it so people can double book if allowed? The user bug is that multiple bookings are hidden. Let's keep the current logic but use the calculated max columns.
                     if (booking) return null;
 
                     // Check for space-level availability (e.g. maintenance)
@@ -107,7 +108,7 @@ export default function TimelineGrid() {
                         key={`slot-${slot.index}`}
                         style={{ 
                           gridRow: arrayIndex + 1, 
-                          gridColumn: 1,
+                          gridColumn: '1 / -1',
                           ...(notAvailable ? { backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(0,0,0,0.03) 10px, rgba(0,0,0,0.03) 20px)' } : {})
                         }}
                         className={`group border-b border-surface-100 last:border-b-0 transition-colors ${
@@ -136,9 +137,28 @@ export default function TimelineGrid() {
                   })}
 
                   {/* Booking Cards */}
-                  {spaceBookings.filter(b => b.status === 'confirmed').map(booking => {
-                    const startSlotIndexInArray = timeSlots.findIndex(s => s.index === booking.slotIndex);
-                    if (startSlotIndexInArray === -1) return null;
+                  {(() => {
+                    const confirmedBookings = spaceBookings.filter(b => b.status === 'confirmed').sort((a,b) => a.slotIndex - b.slotIndex);
+                    const columns = [];
+                    const bookingColumns = new Map();
+
+                    confirmedBookings.forEach(booking => {
+                      let duration = booking.durationBlocks || 1;
+                      let endSlot = booking.slotIndex + duration;
+                      
+                      let colIdx = columns.findIndex(col => col <= booking.slotIndex);
+                      if (colIdx === -1) {
+                          colIdx = columns.length;
+                          columns.push(endSlot);
+                      } else {
+                          columns[colIdx] = endSlot;
+                      }
+                      bookingColumns.set(booking.id, colIdx + 1);
+                    });
+
+                    return confirmedBookings.map(booking => {
+                      const startSlotIndexInArray = timeSlots.findIndex(s => s.index === booking.slotIndex);
+                      if (startSlotIndexInArray === -1) return null;
                     
                     const startSlot = timeSlots[startSlotIndexInArray];
                     const duration = booking.durationBlocks || 1;
@@ -155,7 +175,7 @@ export default function TimelineGrid() {
                         key={booking.id}
                         style={{ 
                           gridRow: `${startSlotIndexInArray + 1} / span ${duration}`,
-                          gridColumn: 1 
+                          gridColumn: bookingColumns.get(booking.id) 
                         }}
                         className={`m-2 rounded-xl p-4 shadow-sm border-2 flex flex-col justify-center overflow-hidden transition-transform hover:scale-[1.01] ${
                           isYours 
@@ -188,7 +208,8 @@ export default function TimelineGrid() {
                         </div>
                       </div>
                     );
-                  })}
+                  });
+                  })()}
                 </div>
               </div>
             </div>
